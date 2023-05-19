@@ -48,6 +48,12 @@ public class FloorAgent : Agent
             SetReward(0.1f);
         }
     }
+    public override void Heuristic(in ActionBuffers actionsOut)
+    {
+        var ContinuousActionOut = actionsOut.ContinuousActions;
+        ContinuousActionOut[0] = -Input.GetAxis("Horizontal");
+        ContinuousActionOut[1] = Input.GetAxis("Vertical");
+    }
 
     private bool DropBall()
     {
@@ -56,7 +62,4 @@ public class FloorAgent : Agent
             || Mathf.Abs(ball.transform.position.z - transform.position.z) > 2.5f;
     }
 
-    public override void Heuristic(in ActionBuffers actionsOut)
-    {
-    }
 }
