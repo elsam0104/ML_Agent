@@ -6,6 +6,15 @@ TagManager:
   tags:
   - BabyPenguin
   - Fish
+  - DeadZone
+  - BAD_ITEM
+  - GOOD_ITEM
+  - WALL
+  - HINT
+  - RED
+  - BLUE
+  - BLACK
+  - GREEN
   layers:
   - Default
   - TransparentFX

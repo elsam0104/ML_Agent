@@ -1,24 +1,30 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using TMPro;
 using UnityEngine;
+using TMPro;
+
+using Random = UnityEngine.Random;
 
 public class PenguinArea : MonoBehaviour
 {
     public PenguinAgent penguinAgent;
     public GameObject penguinBaby;
-    public TMP_Text cumulativeRewardText;
-    public Fish fishPrefab;
-    private List<GameObject> fishList;
+    public TextMeshPro cumulativeRewardText;
 
-    public void ResetArea()
+    public Fish fishPrefab;
+    private List<Fish> fishList = new List<Fish>();
+
+    public int FishRemaining { get { return fishList.Count; } }
+
+    private void Update()
     {
-        RemoveAllFish();
-        PlacePenguin();
-        PlayBaby();
-        SpawnFish(4, .5f);
+        cumulativeRewardText.text = penguinAgent.GetCumulativeReward().ToString("0.00");
     }
+
+    /// <summary>
+    /// Choose Random Position in Sector
+    /// </summary>
     public static Vector3 ChooseRandomPosition(Vector3 center, float minAngle, float maxAngle, float minRadius, float maxRadius)
     {
         float radius = minRadius;
@@ -28,41 +34,54 @@ public class PenguinArea : MonoBehaviour
         {
             radius = Random.Range(minRadius, maxRadius);
         }
+
         if (maxAngle > minAngle)
         {
             angle = Random.Range(minAngle, maxAngle);
         }
+
         return center + Quaternion.Euler(0f, angle, 0f) * Vector3.forward * radius;
     }
+
+
+    public void ResetArea()
+    {
+        RemoveAllFish();
+        PlacePenguin();
+        PlaceBaby();
+        SpawnFish(4, 0.5f);
+    }
+
+    #region  Setting Episode
     private void PlacePenguin()
     {
-        Rigidbody rigid = penguinAgent.GetComponent<Rigidbody>();
-        rigid.velocity = Vector3.zero;
-        rigid.angularVelocity = Vector3.zero;
-
-        penguinAgent.transform.position = ChooseRandomPosition(transform.position, 0f, 360f, 0f, 9f) + Vector3.up * .5f;
-        penguinAgent.transform.rotation = Quaternion.Euler(0f, Random.Range(0f, 360), 0);
+        ResetRigidbodyVelocity(penguinAgent.GetComponent<Rigidbody>());
+        penguinAgent.transform.position = ChooseRandomPosition(transform.position, 0f, 360f, 0f, 9f) + Vector3.up * 0.5f;
+        penguinAgent.transform.rotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
     }
-    private void PlayBaby()
+
+    private void PlaceBaby()
     {
-        Rigidbody rigid = penguinBaby.GetComponent<Rigidbody>();
-        rigid.velocity = Vector3.zero;
-        rigid.angularVelocity = Vector3.zero;
-        penguinBaby.transform.position = ChooseRandomPosition(transform.position, -45f, 45f, 4f, 9f) + Vector3.up * .5f;
+        ResetRigidbodyVelocity(penguinBaby.GetComponent<Rigidbody>());
+        penguinBaby.transform.position = ChooseRandomPosition(transform.position, -45f, 45f, 4f, 9f) + Vector3.up * 0.5f;
         penguinBaby.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
     }
 
+    public void RemoveFish(GameObject fish)
+    {
+        fishList.Remove(fish.GetComponent<Fish>());
+        Destroy(fish);
+    }
     private void SpawnFish(int count, float fishSpeed)
     {
         for (int i = 0; i < count; i++)
         {
-            GameObject fishObject = Instantiate(fishPrefab.gameObject);
-            fishObject.transform.position = ChooseRandomPosition(transform.position, 100f, 260f, 2f, 13f) + Vector3.up * .5f;
-            fishObject.transform.rotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
+            Vector3 spawnPos = ChooseRandomPosition(transform.position, 100f, 260f, 2f, 13f) + Vector3.up * 0.5f;
+            Quaternion rotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
 
-            fishObject.transform.SetParent(transform);
-            fishList.Add(fishObject);
-            fishObject.GetComponent<Fish>().fishSpeed = fishSpeed;
+            Fish fish = Instantiate(fishPrefab, spawnPos, rotation, transform);
+            fish.fishSpeed = fishSpeed;
+            fishList.Add(fish);
         }
     }
 
@@ -74,10 +93,18 @@ public class PenguinArea : MonoBehaviour
             {
                 if (fishList[i] != null)
                 {
-                    Destroy(fishList[i]);
+                    Destroy(fishList[i].gameObject);
                 }
             }
-            fishList = new List<GameObject>();
+
+            fishList.Clear();
         }
     }
+
+    private void ResetRigidbodyVelocity(Rigidbody rigid)
+    {
+        rigid.velocity = Vector3.zero;
+        rigid.angularVelocity = Vector3.zero;
+    }
+    #endregion
 }
