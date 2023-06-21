@@ -15,18 +15,25 @@ public class Player : MonoBehaviour, IWeaponable
     [SerializeField]
     private GameObject gunPrefab;
 
-    private GameObject flower;
+    //private GameObject flower;
     private GameObject gun;
     private Animator animator;
 
-    public float turnSpeed = 4.0f;    
-    public float moveSpeed = 4.0f; 
+    public float turnSpeed = 4.0f;
+    public float moveSpeed = 4.0f;
+
+
+    private int dead = 0;
+    private int walk = 0;
+    private int attatchGun = 0;
     private void Awake()
     {
-        flower = transform.GetChild(3).gameObject;
-        gun = transform.GetChild(2).gameObject;
+        //flower = transform.GetChild(3).gameObject;
+        gun = transform.GetChild(3).gameObject;
         animator = GetComponent<Animator>();
-
+        dead = Animator.StringToHash("Dead");
+        walk = Animator.StringToHash("Walk");
+        attatchGun = Animator.StringToHash("AttatchGun");
     }
     public void GetWeapon()
     {
@@ -34,10 +41,11 @@ public class Player : MonoBehaviour, IWeaponable
         if (Controller.instance.DataSO.playerWin == 10)
         {
             gun.SetActive(true);
+            animator.SetTrigger(attatchGun);
             Controller.instance.PlayerWin();
             return;
         }
-        SceneManager.LoadScene(SceneManager.GetActiveScene().ToString());
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
 
@@ -51,7 +59,14 @@ public class Player : MonoBehaviour, IWeaponable
         Vector3 move =
             transform.forward * Input.GetAxis("Vertical") +
             transform.right * Input.GetAxis("Horizontal");
-
+        if (move != Vector3.zero)
+        {
+            animator.SetBool(walk, true);
+        }
+        else
+        {
+            animator.SetBool(walk, false);
+        }
         transform.position += move * moveSpeed * Time.deltaTime;
     }
 

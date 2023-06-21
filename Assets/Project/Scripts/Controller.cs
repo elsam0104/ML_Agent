@@ -10,6 +10,12 @@ public class Controller : MonoBehaviour
     private GameDataSO dataSO;
     [SerializeField]
     private TMP_Text score;
+    [SerializeField]
+    private GameObject winPanel;
+    [SerializeField]
+    private TMP_Text winText;
+    [SerializeField]
+    private ParticleSystem endEffect;
     public GameDataSO DataSO { get { return dataSO; } }
     public static Controller instance;
     private void Start()
@@ -19,10 +25,13 @@ public class Controller : MonoBehaviour
     }
     public void PlayerWin()
     {
-
+        winText.text = "Player Win!";
+        winPanel.SetActive(true);
+        endEffect.Play();
     }
     public void RabbitWin()
     {
-
+        winText.text = "Rabbit Win!";
+        winPanel.SetActive(true);
     }
 }

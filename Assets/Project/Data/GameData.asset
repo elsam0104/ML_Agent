@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80949231eff1f064c884d4532a695c24, type: 3}
   m_Name: GameData
   m_EditorClassIdentifier: 
-  playerWin: 3
+  playerWin: 0
   rabbitWin: 0

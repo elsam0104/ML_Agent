@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.MLAgents;
 using UnityEngine;
 
 public class Board : MonoBehaviour
@@ -16,6 +17,10 @@ public class Board : MonoBehaviour
     private Material defaultMaterial;
     [SerializeField]
     private GameObject targetGameObject;
+    [Header("Agent")]
+    public bool isAgent = false;
+    [SerializeField]
+    private Agent agent;
     private IWeaponable target;
     private List<bool> answer = new List<bool>(9);
     private List<bool> right = new List<bool>(9);
@@ -28,8 +33,14 @@ public class Board : MonoBehaviour
     {
         for (int i = 0; i < btns.Count; i++)
         {
-            screens[i].sharedMaterial = (Random.Range(0, 2) == 0) ? defaultMaterial : rightMaterial;
+            int tmp = Random.Range(0, 2);
+            if (tmp == 0)
+                screens[i].tag = "BAD_ITEM";
+            else
+                screens[i].tag = "GOOD_ITEM";
+            screens[i].sharedMaterial = (tmp == 0) ? defaultMaterial : rightMaterial;
             btns[i].Id = i;
+            btns[i].GetComponent<MeshRenderer>().sharedMaterial = defaultMaterial;
         }
         for (int i = 0; i < 9; i++)
         {
@@ -50,8 +61,10 @@ public class Board : MonoBehaviour
         //if (right[idx]) return;
         bool tmp = screens[idx].sharedMaterial == btns[idx].GetComponent<MeshRenderer>().sharedMaterial;
         right[idx] = tmp;
-
-
+        if (tmp && isAgent)
+            agent.AddReward(0.3f);
+        else if (!tmp && isAgent)
+            agent.AddReward(-0.3f);
         if (right.TrueForAll((x) => x))
         {
             Instantiate(target.ReturnWeapon(), btns[5].transform.position, Quaternion.identity);
